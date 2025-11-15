@@ -1,0 +1,82 @@
+class Solution:
+    def numberOfSubstrings(self, s):
+        n = len(s)
+        zeros_idx = [i for i, ch in enumerate(s) if ch == '0']
+
+        ans = 0
+
+        # Handle z = 0 separately: substrings with no zeros (all ones)
+        # every contiguous block of ones of length L contributes L*(L+1)//2
+        i = 0
+        while i < n:
+            if s[i] == '1':
+                j = i
+                while j < n and s[j] == '1':
+                    j += 1
+                L = j - i
+                ans += L * (L + 1) // 2
+                i = j
+            else:
+                i += 1
+
+        m = len(zeros_idx)
+        # helper: count number of pairs (x,y) with 0<=x<L, 0<=y<R and x+y < T
+        def pairs_sum_lt(T, L, R):
+            if T <= 0:
+                return 0
+            # max possible sum is (L-1)+(R-1) = L+R-2, so if T > L+R-1 then all pairs satisfy sum < T
+            if T >= L + R:
+                return L * R
+            # We'll split x into two regions:
+            # For x <= T-R-1  -> y_max = R-1  (contribute R each)
+            # For x in (T-R .. T-1) -> y_max = T-1-x  (contribute T-x)
+            # x runs from 0..L-1, but we clamp ranges
+            x1 = min(L - 1, max(-1, T - R - 1))  # last x where y_max = R-1
+            cnt1 = (x1 + 1) * R if x1 >= 0 else 0
+
+            x_start = x1 + 1
+            x_end = min(L - 1, T - 1)  # last x with y_max >= 0
+            cnt2 = 0
+            if x_start <= x_end:
+                cnt = x_end - x_start + 1
+                # sum_{x=x_start..x_end} (T - x) = cnt*T - sum(x_start..x_end)
+                sum_x = (x_start + x_end) * cnt // 2
+                cnt2 = cnt * T - sum_x
+            return cnt1 + cnt2
+
+        # Iterate over possible zero counts z >= 1
+        z = 1
+        while z + z * z <= n:
+            min_len = z + z * z  # minimal required substring length for this z
+            # iterate windows of z zeros: zeros_idx[j..j+z-1]
+            if m < z:
+                break
+            for j in range(0, m - z + 1):
+                a = zeros_idx[j]
+                b = zeros_idx[j + z - 1]
+                # how many ways to extend left without including an extra zero?
+                left_choices = a - (zeros_idx[j - 1] if j - 1 >= 0 else -1)
+                # how many ways to extend right without including an extra zero?
+                right_choices = (zeros_idx[j + z] if (j + z) < m else n) - b
+
+                base_len = b - a + 1  # current minimal length covering these z zeros
+                needed_extra = min_len - base_len
+                total_pairs = left_choices * right_choices
+                if needed_extra <= 0:
+                    ans += total_pairs
+                else:
+                    # count pairs (l_expand, r_expand) with l_expand in [0..left_choices-1],
+                    # r_expand in [0..right_choices-1], and l_expand + r_expand >= needed_extra
+                    # = total_pairs - pairs with sum < needed_extra
+                    bad = pairs_sum_lt(needed_extra, left_choices, right_choices)
+                    ans += (total_pairs - bad)
+            z += 1
+
+        return ans
+
+
+# Quick self-check examples (you can remove before submission)
+if __name__ == "__main__":
+    sol = Solution()
+    print(sol.numberOfSubstrings("00011"))   # expected 5
+    print(sol.numberOfSubstrings("101101"))  # expected 16
