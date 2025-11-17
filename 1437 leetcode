@@ -1,0 +1,18 @@
+class Solution(object):
+    def kLengthApart(self, nums, k):
+        last_position_of_1 = -1
+        m = len(nums)
+        for i in range(m):
+            if nums[i] == 1:
+                if last_position_of_1 != -1:
+                    d = i - last_position_of_1 - 1 
+                    if d <k:
+                        return False
+                last_position_of_1 = i  
+                
+        return True
+
+nums =[1,0,0,0,1,0,0,1]
+k = 2        
+obj = Solution()
+print(obj.kLengthApart(nums,k))
