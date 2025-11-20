@@ -1,0 +1,30 @@
+class Solution(object):
+    def intersectionSizeTwo(self, intervals):
+        # Step 1: sort by end ascending 
+        # (if tie, by start descending)
+        intervals.sort(key=lambda x: (x[1], -x[0]))
+
+        # We will store the last two chosen points
+        s = -1
+        e = -1
+        
+        answer = 0
+
+        for a, b in intervals:
+            if a > e:
+                # no chosen numbers in this interval
+                # choose two new numbers: b-1 and b
+                answer += 2
+                s = b - 1
+                e = b
+
+            elif a > s:
+                # only one chosen number is inside
+                # choose one more: b
+                answer += 1
+                s = e
+                e = b
+            # else:
+            # we already have 2 numbers inside; no need to add
+        
+        return answer
