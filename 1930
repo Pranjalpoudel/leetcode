@@ -1,0 +1,20 @@
+class Solution(object):
+    def countPalindromicSubsequence(self, s):
+        ans = 0
+        # iterate over each possible character a-z
+        for c in range(26):
+            ch = chr(ord('a') + c)
+            # find first and last occurrence
+            l = s.find(ch)
+            r = s.rfind(ch)
+            if l == -1 or r == -1 or l >= r - 1:
+                continue
+            # count distinct characters in between
+            middle_chars = set(s[l+1:r])
+            ans += len(middle_chars)
+        return ans
+   
+        
+s = "aabca"
+obj = Solution()
+print(obj.countPalindromicSubsequence(s))
