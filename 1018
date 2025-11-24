@@ -1,0 +1,16 @@
+class Solution(object):
+    def prefixesDivBy5(self, nums):
+        n = len(nums)
+        num = 0
+        result =[]
+        for i in range(n):
+            num = (num * 2 + nums[i]) 
+            #result.append(num == 0)
+
+            if num % 5 == 0:
+                result.append(True) 
+            else:
+                result.append(False) 
+        return result
+       
+        
