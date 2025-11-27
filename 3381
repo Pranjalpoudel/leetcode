@@ -1,0 +1,26 @@
+class Solution:
+    def maxSubarraySum(self, nums, k):
+        n = len(nums)
+        prefix = 0
+        
+        # store minimum prefix sum for each modulo class
+        INF = 10**30
+        minPref = [INF] * k
+        
+        # base case: prefix[0] = 0 at index 0
+        minPref[0] = 0
+        
+        res = -10**30
+        
+        for i, x in enumerate(nums, 1):  # i = prefix index (1-based)
+            prefix += x
+            mod = i % k
+            
+            # check candidate subarray
+            if minPref[mod] != INF:
+                res = max(res, prefix - minPref[mod])
+            
+            # update minimum prefix for this mod class
+            minPref[mod] = min(minPref[mod], prefix)
+        
+        return res
