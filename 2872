@@ -1,0 +1,29 @@
+class Solution:
+    def maxKDivisibleComponents(self, n, edges, values, k):
+        # adjacency list
+        g = [[] for _ in range(n)]
+        for a, b in edges:
+            g[a].append(b)
+            g[b].append(a)
+
+        ans = [0]  # mutable container to avoid nonlocal issues
+
+        def dfs(node, parent):
+            s = values[node]
+            for nei in g[node]:
+                if nei == parent:
+                    continue
+                child_sum = dfs(nei, node)
+
+                if child_sum % k == 0:
+                    ans[0] += 1   # <-- safe
+                else:
+                    s += child_sum
+            return s
+
+        total_sum = dfs(0, -1)
+
+        if total_sum % k == 0:
+            ans[0] += 1
+
+        return ans[0]
