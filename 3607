@@ -1,0 +1,54 @@
+class Solution(object):
+    def processQueries(self, c, connections, queries):
+        # ----- DSU -----
+        parent = list(range(c+1))
+        rank = [0]*(c+1)
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(a, b):
+            ra, rb = find(a), find(b)
+            if ra == rb: return
+            if rank[ra] < rank[rb]: parent[ra] = rb
+            elif rank[ra] > rank[rb]: parent[rb] = ra
+            else:
+                parent[rb] = ra
+                rank[ra] += 1
+
+        # Build components
+        for u, v in connections:
+            union(u, v)
+
+        # Min-heaps per component
+        import heapq
+        comp = {}
+        for x in range(1, c+1):
+            r = find(x)
+            comp.setdefault(r, []).append(x)
+        for r in comp:
+            heapq.heapify(comp[r])
+
+        # Track which stations are still online
+        online = [True]*(c+1)
+
+        ans = []
+        for t, x in queries:
+            if t == 1:
+                if online[x]:
+                    ans.append(x)
+                else:
+                    r = find(x)
+                    h = comp[r]
+                    while h and not online[h[0]]:
+                        heapq.heappop(h)
+                    ans.append(h[0] if h else -1)
+            else:  # t == 2
+                online[x] = False
+
+        return ans
+
+        
