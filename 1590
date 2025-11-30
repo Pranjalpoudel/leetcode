@@ -1,0 +1,29 @@
+class Solution(object):
+    def minSubarray(self, nums, p):
+        total = sum(nums)
+        r = total % p
+        
+        # If already divisible, no need to remove anything
+        if r == 0:
+            return 0
+        
+        prefix_mod = 0
+        last_seen = {0: -1}   # prefix mod 0 occurs before array starts
+        
+        ans = len(nums)
+        
+        for i, num in enumerate(nums):
+            prefix_mod = (prefix_mod + num) % p
+            
+            # We want: (prefix_mod - previous_mod) % p == r
+            # So previous_mod = (prefix_mod - r) % p
+            need = (prefix_mod - r) % p
+            
+            if need in last_seen:
+                length = i - last_seen[need]
+                ans = min(ans, length)
+            
+            # store the latest index for this prefix mod
+            last_seen[prefix_mod] = i
+        
+        return ans if ans < len(nums) else -1
