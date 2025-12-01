@@ -1,0 +1,22 @@
+class Solution(object):
+    def maxRunTime(self, n, batteries):
+        left = 0
+        right = sum(batteries) // n  # max possible T
+
+        while left < right:
+            mid = (left + right + 1) // 2
+
+            total = 0
+            for b in batteries:
+                if b < mid:
+                    total += b
+                else:
+                    total += mid
+
+            # check if we can run all n computers for mid minutes
+            if total >= mid * n:
+                left = mid
+            else:
+                right = mid - 1
+
+        return left
