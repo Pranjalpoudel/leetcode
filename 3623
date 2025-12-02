@@ -1,0 +1,46 @@
+class Solution(object):
+    def countTrapezoids(self, points):
+        """
+        :type points: List[List[int]]
+        :rtype: int
+        """
+        MOD = 10**9 + 7
+        
+        # Dictionary to store the count of points for each y-coordinate
+        # Key: y-coordinate, Value: number of points
+        y_map = {}
+        
+        for p in points:
+            y = p[1]
+            if y in y_map:
+                y_map[y] += 1
+            else:
+                y_map[y] = 1
+        
+        # List to store the number of valid horizontal segments at each y-level
+        # A valid segment requires at least 2 points at the same y-level.
+        segment_counts = []
+        
+        for count in y_map.values():
+            if count >= 2:
+                # Calculate nC2: ways to pick 2 points from 'count' points
+                ways = (count * (count - 1)) // 2
+                segment_counts.append(ways)
+        
+        # Calculate the sum of products of all pairs of segment counts
+        # We need sum(S[i] * S[j]) for all distinct levels i < j.
+        # This can be computed efficiently:
+        # As we iterate, multiply current level count by the sum of all previous level counts.
+        
+        ans = 0
+        running_sum = 0
+        
+        for ways in segment_counts:
+            # Add (current_level_ways * sum_of_previous_level_ways) to answer
+            term = (ways * running_sum) % MOD
+            ans = (ans + term) % MOD
+            
+            # Add current level ways to the running sum for the next iteration
+            running_sum = (running_sum + ways) % MOD
+            
+        return int(ans)
