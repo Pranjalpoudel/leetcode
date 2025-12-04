@@ -1,0 +1,22 @@
+class Solution(object):
+    def countCollisions(self, directions):
+        directions = list(directions)
+        n = len(directions)
+        total = 0
+        
+        # Remove leftmost safe L cars
+        i = 0
+        while i < n and directions[i] == 'L':
+            i += 1
+        
+        # Remove rightmost safe R cars
+        j = n - 1
+        while j >= 0 and directions[j] == 'R':
+            j -= 1
+        
+        # Count collisions in the remaining part
+        for k in range(i, j + 1):
+            if directions[k] != 'S':
+                total += 1
+        
+        return total
