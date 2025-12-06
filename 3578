@@ -1,0 +1,57 @@
+class Solution:
+    def countPartitions(self, nums, k):
+        MOD = 10**9 + 7
+        n = len(nums)
+        
+        # dp[i] = number of ways to partition the prefix nums[:i]
+        dp = [0] * (n + 1)
+        dp[0] = 1
+        
+        # Manual Monotonic Queues using lists + head pointers
+        # max_q stores indices of max elements (decreasing order)
+        # min_q stores indices of min elements (increasing order)
+        max_q = []
+        min_q = []
+        max_head = 0
+        min_head = 0
+        
+        left = 0
+        window_sum = 0
+        
+        for right in range(n):
+            # Add the contribution of the new partition ending at 'right'
+            # (which comes from the state dp[right])
+            window_sum = (window_sum + dp[right]) % MOD
+            
+            # Maintain Max Queue (Decreasing): Pop back while smaller
+            while max_head < len(max_q) and nums[max_q[-1]] <= nums[right]:
+                max_q.pop()
+            max_q.append(right)
+            
+            # Maintain Min Queue (Increasing): Pop back while larger
+            while min_head < len(min_q) and nums[min_q[-1]] >= nums[right]:
+                min_q.pop()
+            min_q.append(right)
+            
+            # Shrink window if the condition (Max - Min <= k) is violated
+            while True:
+                curr_max = nums[max_q[max_head]]
+                curr_min = nums[min_q[min_head]]
+                
+                if curr_max - curr_min <= k:
+                    break
+                
+                # Window is invalid, remove the leftmost contribution
+                window_sum = (window_sum - dp[left] + MOD) % MOD
+                left += 1
+                
+                # Lazy pop from front: just move the head pointer forward
+                if max_q[max_head] < left:
+                    max_head += 1
+                if min_q[min_head] < left:
+                    min_head += 1
+            
+            # Assign valid sum to current DP state
+            dp[right + 1] = window_sum
+            
+        return dp[n]
