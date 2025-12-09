@@ -1,0 +1,32 @@
+class Solution:
+    def specialTriplets(self, nums: list[int]) -> int: # <-- RENAMED HERE
+        n = len(nums)
+        MOD = 10**9 + 7
+        total_triplets = 0
+
+        right_counts = {} 
+        for i in range(1, n):
+            right_counts[nums[i]] = right_counts.get(nums[i], 0) + 1
+            
+        left_counts = {}
+        if n > 0:
+            left_counts[nums[0]] = 1
+        
+        for j in range(1, n - 1):
+            
+            right_counts[nums[j]] -= 1
+            if right_counts[nums[j]] == 0:
+                del right_counts[nums[j]]
+            
+            current_val = nums[j]
+            target = current_val * 2
+            
+            count_i = left_counts.get(target, 0)
+            count_k = right_counts.get(target, 0)
+            
+            if count_i > 0 and count_k > 0:
+                total_triplets = (total_triplets + count_i * count_k) % MOD
+                
+            left_counts[current_val] = left_counts.get(current_val, 0) + 1
+
+        return total_triplets
