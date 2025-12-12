@@ -1,0 +1,48 @@
+class Solution(object):
+    def countMentions(self, numberOfUsers, events):
+        # Result array to store mention counts for each user
+        ans = [0] * numberOfUsers
+        # Stores the timestamp when a user will be online again (initially 0)
+        online_at = [0] * numberOfUsers
+        
+        # Sort events:
+        # 1. By timestamp (integer)
+        # 2. By type: 'OFFLINE' should come before 'MESSAGE' at the same timestamp.
+        # Since 'O' comes after 'M' alphabetically, we can sort by type reversed
+        # or use a custom weight.
+        def sort_key(event):
+            etype, timestamp, _ = event
+            # Weight: OFFLINE = 0, MESSAGE = 1 (to process OFFLINE first)
+            priority = 0 if etype == "OFFLINE" else 1
+            return (int(timestamp), priority)
+
+        events.sort(key=sort_key)
+
+        for event in events:
+            etype, timestamp, data = event
+            curr_time = int(timestamp)
+
+            if etype == "OFFLINE":
+                user_id = int(data)
+                # User stays offline for 60 units
+                online_at[user_id] = curr_time + 60
+
+            elif etype == "MESSAGE":
+                if data == "ALL":
+                    for i in range(numberOfUsers):
+                        ans[i] += 1
+                
+                elif data == "HERE":
+                    for i in range(numberOfUsers):
+                        # User is online if their 'online_at' time is <= current time
+                        if online_at[i] <= curr_time:
+                            ans[i] += 1
+                
+                else:
+                    # Specific IDs like "id1 id2"
+                    mentions = data.split()
+                    for m in mentions:
+                        user_id = int(m[2:]) # Skip the "id" prefix
+                        ans[user_id] += 1
+                        
+        return ans
