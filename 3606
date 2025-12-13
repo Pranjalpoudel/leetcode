@@ -1,0 +1,30 @@
+class Solution(object):
+    def validateCoupons(self, code, businessLine, isActive):
+
+        # Allowed categories in required order
+        order = ["electronics", "grocery", "pharmacy", "restaurant"]
+        # Build a mapping to sort by businessLine easily
+        order_index = {cat: i for i, cat in enumerate(order)}
+        
+        def valid_code(s):
+            # Must be non-empty
+            if not s:
+                return False
+            # Each character must be alphanumeric or underscore
+            for ch in s:
+                if not (ch.isalpha() or ch.isdigit() or ch == "_"):
+                    return False
+            return True
+
+        valid = []
+        # Collect only valid entries
+        for c, b, act in zip(code, businessLine, isActive):
+            if act and valid_code(c) and b in order_index:
+                # Store a tuple (business_line_order, code) for sorting
+                valid.append((order_index[b], c))
+
+        # Sort by businessLine order then lexicographically by code
+        valid.sort(key=lambda x: (x[0], x[1]))
+
+        # Extract and return the codes
+        return [c for _, c in valid]
