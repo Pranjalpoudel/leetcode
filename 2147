@@ -1,0 +1,18 @@
+class Solution(object):
+    def numberOfWays(self, corridor):
+        MOD = 10**9 + 7
+        
+        seats = [i for i, c in enumerate(corridor) if c == 'S']
+        
+        # If total seats is odd or zero, impossible
+        if len(seats) == 0 or len(seats) % 2 != 0:
+            return 0
+        
+        ways = 1
+        
+        # Process seat pairs
+        for i in range(2, len(seats), 2):
+            plants_between = seats[i] - seats[i - 1] - 1
+            ways = (ways * (plants_between + 1)) % MOD
+        
+        return ways
