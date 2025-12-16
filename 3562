@@ -1,0 +1,127 @@
+class Solution(object):
+    def maxProfit(self, n, present, future, hierarchy, budget):
+        NEG = -10**30
+
+        # ----- build tree/forest -----
+        children = [[] for _ in range(n)]
+        indeg = [0] * n
+
+        if hierarchy:
+            # Support either:
+            # 1) edges: [[p, c], ...]  (most common)
+            # 2) parent array: [parent_of_0, parent_of_1, ...] (ints)
+            if isinstance(hierarchy[0], int):
+                # parent array form
+                for i in range(n):
+                    p = hierarchy[i]
+                    if p is None or p == -1:
+                        continue
+                    if p >= 1 and p <= n and max(hierarchy) == n:
+                        p -= 1  # heuristic 1-based
+                    children[p].append(i)
+                    indeg[i] += 1
+            else:
+                # edge list form
+                mx = -1
+                for e in hierarchy:
+                    if e:
+                        if e[0] > mx: mx = e[0]
+                        if e[1] > mx: mx = e[1]
+                shift = (mx >= n)  # heuristic: 1-based if any index == n
+                for p, c in hierarchy:
+                    if shift:
+                        p -= 1
+                        c -= 1
+                    children[p].append(c)
+                    indeg[c] += 1
+
+        roots = [i for i in range(n) if indeg[i] == 0]
+
+        # ----- knapsack helpers (variable-length dp arrays, dp[cost] = best profit) -----
+        def merge(a, b):
+            # max-plus convolution with cost cap = budget
+            la = len(a) - 1
+            lb = len(b) - 1
+            new_len = min(budget, la + lb) + 1
+            res = [NEG] * new_len
+            for i in range(len(a)):
+                ai = a[i]
+                if ai == NEG:
+                    continue
+                maxj = min(lb, budget - i)
+                for j in range(maxj + 1):
+                    bj = b[j]
+                    if bj == NEG:
+                        continue
+                    v = ai + bj
+                    ij = i + j
+                    if v > res[ij]:
+                        res[ij] = v
+            return res
+
+        def maxlists(a, b):
+            if a is None:
+                return b
+            if b is None:
+                return a
+            L = max(len(a), len(b))
+            res = [NEG] * L
+            for i in range(L):
+                v = NEG
+                if i < len(a) and a[i] > v:
+                    v = a[i]
+                if i < len(b) and b[i] > v:
+                    v = b[i]
+                res[i] = v
+            return res
+
+        # dp0[u]: best profits in subtree u when u's parent is NOT bought (no discount for u)
+        # dp1[u]: best profits in subtree u when u's parent IS bought (u may be discounted)
+        dp0 = [None] * n
+        dp1 = [None] * n
+
+        # ----- iterative postorder over all roots -----
+        stack = []
+        for r in roots:
+            stack.append((r, 0))
+        while stack:
+            u, state = stack.pop()
+            if state == 0:
+                stack.append((u, 1))
+                for v in children[u]:
+                    stack.append((v, 0))
+            else:
+                # Option A: don't buy u => children see "parent not bought" => dp0[child]
+                notbuy = [0]  # cost 0 profit 0
+                for v in children[u]:
+                    notbuy = merge(notbuy, dp0[v])
+
+                # Option B0: buy u at full price (only for dp0)
+                buy_full = None
+                c_full = present[u]
+                if c_full <= budget:
+                    buy_full = [NEG] * (c_full + 1)
+                    buy_full[c_full] = future[u] - c_full
+                    for v in children[u]:
+                        buy_full = merge(buy_full, dp1[v])
+
+                dp0[u] = maxlists(notbuy, buy_full)
+
+                # Option B1: buy u at discounted price (only for dp1)
+                buy_disc = None
+                c_disc = present[u] // 2
+                if c_disc <= budget:
+                    buy_disc = [NEG] * (c_disc + 1)
+                    buy_disc[c_disc] = future[u] - c_disc
+                    for v in children[u]:
+                        buy_disc = merge(buy_disc, dp1[v])
+
+                dp1[u] = maxlists(notbuy, buy_disc)
+
+        # ----- combine all roots (forest) under a virtual root not bought -----
+        total = [0]
+        for r in roots:
+            total = merge(total, dp0[r])
+
+        ans = max(total) if total else 0
+        return ans if ans > 0 else 0
