@@ -1,0 +1,39 @@
+class Solution:
+    def maximumProfit(self, prices, k):
+        n = len(prices)
+        if n == 0 or k == 0:
+            return 0
+        
+        # dp[j][state] represents max profit with j transactions remaining
+        # state 0: Neutral, 1: Long, 2: Short
+        # We use float('-inf') to represent unreachable states
+        dp = [[float('-inf')] * 3 for _ in range(k + 1)]
+        
+        # Base case: 0 transactions done, Neutral state
+        for j in range(k + 1):
+            dp[j][0] = 0
+            
+        for price in prices:
+            new_dp = [[float('-inf')] * 3 for _ in range(k + 1)]
+            for j in range(k + 1):
+                # State 0 (Neutral)
+                # Option A: Stay Neutral
+                # Option B: Just finished a Long position
+                # Option C: Just finished a Short position
+                new_dp[j][0] = dp[j][0]
+                if j > 0:
+                    new_dp[j][0] = max(new_dp[j][0], dp[j-1][1] + price, dp[j-1][2] - price)
+                
+                # State 1 (Holding Long)
+                # Option A: Keep holding
+                # Option B: Start a new Long from Neutral
+                new_dp[j][1] = max(dp[j][1], dp[j][0] - price)
+                
+                # State 2 (Holding Short)
+                # Option A: Keep holding
+                # Option B: Start a new Short from Neutral
+                new_dp[j][2] = max(dp[j][2], dp[j][0] + price)
+            dp = new_dp
+            
+        # The answer is the maximum profit in Neutral state across any number of transactions <= k
+        return max(dp[j][0] for j in range(k + 1))
