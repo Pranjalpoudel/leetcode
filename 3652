@@ -1,0 +1,39 @@
+class Solution:
+    def maxProfit(self, prices, strategy, k):
+        n = len(prices)
+        
+        # 1. Calculate prefix sum of original strategy profits
+        # original_pref[i] = total profit from day 0 to i-1
+        original_pref = [0] * (n + 1)
+        for i in range(n):
+            original_pref[i+1] = original_pref[i] + (prices[i] * strategy[i])
+            
+        # 2. Calculate prefix sum of prices (to calculate window profit)
+        # price_pref[i] = sum of prices from day 0 to i-1
+        price_pref = [0] * (n + 1)
+        for i in range(n):
+            price_pref[i+1] = price_pref[i] + prices[i]
+            
+        total_original_profit = original_pref[n]
+        max_profit = total_original_profit # Baseline: no modification
+        
+        # 3. Slide the window of size k
+        half_k = k // 2
+        for i in range(n - k + 1):
+            # Window range: [i, i + k - 1]
+            # First half (i to i + half_k - 1): Strategy becomes 0 (hold)
+            # Second half (i + half_k to i + k - 1): Strategy becomes 1 (sell)
+            
+            # Profit outside the window
+            prefix_p = original_pref[i]
+            suffix_p = original_pref[n] - original_pref[i + k]
+            
+            # Profit inside the modified window
+            # First half is 0, so contribution is 0
+            # Second half is all 1s, so contribution is the sum of prices in that range
+            window_p = price_pref[i + k] - price_pref[i + half_k]
+            
+            current_total = prefix_p + window_p + suffix_p
+            max_profit = max(max_profit, current_total)
+            
+        return max_profit
