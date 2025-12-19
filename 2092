@@ -1,0 +1,46 @@
+class Solution(object):
+    def findAllPeople(self, n, meetings, firstPerson):
+        # Initialize parent array for Union-Find
+        parent = list(range(n))
+        
+        def find(i):
+            if parent[i] == i:
+                return i
+            parent[i] = find(parent[i]) # Path compression
+            return parent[i]
+
+        def union(i, j):
+            root_i = find(i)
+            root_j = find(j)
+            if root_i != root_j:
+                parent[root_i] = root_j
+
+        # Initially, Person 0 and firstPerson share the secret
+        union(0, firstPerson)
+
+        # Sort meetings by time
+        meetings.sort(key=lambda x: x[2])
+
+        i = 0
+        while i < len(meetings):
+            curr_time = meetings[i][2]
+            temp_people = []
+            
+            # Group meetings by time
+            start = i
+            while i < len(meetings) and meetings[i][2] == curr_time:
+                u, v = meetings[i][0], meetings[i][1]
+                union(u, v)
+                temp_people.append(u)
+                temp_people.append(v)
+                i += 1
+            
+            # Crucial: Reset people not connected to Person 0
+            # If they don't have a path to 0 at this time, they shouldn't be joined
+            for p in temp_people:
+                if find(p) != find(0):
+                    parent[p] = p # Resetting the parent pointer
+        
+        # Result: All people still connected to Person 0
+        root_zero = find(0)
+        return [p for p in range(n) if find(p) == root_zero]
