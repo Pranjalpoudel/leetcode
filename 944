@@ -1,0 +1,20 @@
+class Solution(object):
+    def minDeletionSize(self, strs):
+        delete_count = 0
+    
+    # Number of columns is the length of the first string
+        num_cols = len(strs[0])
+    # Number of rows is the number of strings in the list
+        num_rows = len(strs)
+    
+    # Iterate through each column
+        for col in range(num_cols):
+        # Check each row in the current column
+            for row in range(num_rows - 1):
+            # If the character in the next row is smaller, it's unsorted
+                if strs[row][col] > strs[row + 1][col]:
+                    delete_count += 1
+                    break # Move to the next column immediately
+                
+        return delete_count
+        
