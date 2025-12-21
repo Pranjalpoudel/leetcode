@@ -1,0 +1,27 @@
+class Solution(object):
+    def minDeletionSize(self, strs):
+        rows = len(strs)
+        cols = len(strs[0])
+        res = 0
+        # is_sorted[i] is True if we already know strs[i] < strs[i+1]
+        is_sorted = [False] * (rows - 1)
+        
+        for j in range(cols):
+            # 1. Check if this column is "broken"
+            is_broken = False
+            for i in range(rows - 1):
+                # If row i and i+1 aren't sorted yet, and current chars are decreasing
+                if not is_sorted[i] and strs[i][j] > strs[i+1][j]:
+                    is_broken = True
+                    break
+            
+            # 2. If broken, "delete" column and move on
+            if is_broken:
+                res += 1
+            else:
+                # 3. If valid, update which rows are now officially sorted
+                for i in range(rows - 1):
+                    if strs[i][j] < strs[i+1][j]:
+                        is_sorted[i] = True
+                        
+        return res
