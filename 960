@@ -1,0 +1,19 @@
+class Solution(object):
+
+    def minDeletionSize(self, strs) :
+        num_rows = len(strs)
+        num_cols = len(strs[0])
+        
+        # dp[i] represents the length of the longest valid 
+        # sequence of columns ending at index i.
+        dp = [1] * num_cols
+        
+        for i in range(num_cols):
+            for j in range(i):
+                # Check if column j can precede column i for ALL rows
+                if all(strs[r][j] <= strs[r][i] for r in range(num_rows)):
+                    dp[i] = max(dp[i], dp[j] + 1)
+        
+        # The answer is total columns minus the max columns we can keep
+        return num_cols - max(dp)
+        
