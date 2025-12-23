@@ -1,0 +1,39 @@
+class Solution(object):
+    def maxTwoEvents(self, events):
+       
+        # 1. Sort events by start time
+        events.sort()
+        n = len(events)
+        
+        # 2. Build suffix max array
+        # suffix_max[i] = max value from index i to n-1
+        suffix_max = [0] * (n + 1)
+        for i in range(n - 1, -1, -1):
+            suffix_max[i] = max(events[i][2], suffix_max[i + 1])
+            
+        res = 0
+        
+        # 3. Process each event
+        for i in range(n):
+            start, end, val = events[i]
+            
+            # Find the best single event value (in case we only pick one)
+            # or current event + best future non-overlapping event
+            
+            # Manual Binary Search to find first event starting after 'end'
+            left = i + 1
+            right = n - 1
+            next_event_idx = n
+            
+            while left <= right:
+                mid = (left + right) // 2
+                if events[mid][0] > end:
+                    next_event_idx = mid
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            
+            # Update result with (current value + max value available in the future)
+            res = max(res, val + suffix_max[next_event_idx])
+            
+        return res
