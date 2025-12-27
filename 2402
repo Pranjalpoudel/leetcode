@@ -1,0 +1,42 @@
+import heapq
+
+class Solution(object):
+    def mostBooked(self, n, meetings):
+        # 1. Sort meetings by start time
+        meetings.sort()
+        
+        # 2. Heaps: 
+        # free_rooms stores indices of available rooms
+        # used_rooms stores (end_time, room_index)
+        free_rooms = [i for i in range(n)]
+        heapq.heapify(free_rooms)
+        used_rooms = [] # (end_time, index)
+        
+        # Count of meetings per room
+        booking_count = [0] * n
+        
+        for start, end in meetings:
+            # 3. Free up rooms that finished before the current meeting starts
+            while used_rooms and used_rooms[0][0] <= start:
+                _, room_idx = heapq.heappop(used_rooms)
+                heapq.heappush(free_rooms, room_idx)
+            
+            # 4. Assign a room
+            if free_rooms:
+                # Room is available immediately
+                room_idx = heapq.heappop(free_rooms)
+                heapq.heappush(used_rooms, (end, room_idx))
+            else:
+                # No room available, must wait
+                # The earliest room to become free dictates the new start time
+                earliest_end, room_idx = heapq.heappop(used_rooms)
+                new_end = earliest_end + (end - start)
+                heapq.heappush(used_rooms, (new_end, room_idx))
+            
+            booking_count[room_idx] += 1
+            
+        # 5. Find the room with max bookings (lowest index if tied)
+        max_bookings = max(booking_count)
+        for i in range(n):
+            if booking_count[i] == max_bookings:
+                return i
