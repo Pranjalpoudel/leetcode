@@ -1,0 +1,28 @@
+class Solution(object):
+    def subtreeWithAllDeepest(self, root):
+        # Helper function returns (depth, node)
+        def dfs(node):
+            if not node:
+                return 0, None
+            
+            left_depth, left_node = dfs(node.left)
+            right_depth, right_node = dfs(node.right)
+            
+            # Case 1: Left and right subtrees have the same maximum depth.
+            # This means the current node is the lowest common ancestor
+            # of all deepest nodes found in its subtrees.
+            if left_depth == right_depth:
+                return left_depth + 1, node
+            
+            # Case 2: Left subtree is deeper.
+            # The result must be deeper within the left branch.
+            elif left_depth > right_depth:
+                return left_depth + 1, left_node
+            
+            # Case 3: Right subtree is deeper.
+            # The result must be deeper within the right branch.
+            else:
+                return right_depth + 1, right_node
+        
+        # We only care about the node returned, not the total depth.
+        return dfs(root)[1]
