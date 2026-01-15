@@ -1,0 +1,43 @@
+class Solution(object):
+    def maximizeSquareHoleArea(self, n, m, hBars, vBars):
+        """
+        n  -> number of horizontal bars
+        m  -> number of vertical bars
+        hBars -> list of removed horizontal bars
+        vBars -> list of removed vertical bars
+        """
+
+        # This function finds the longest consecutive sequence in a list
+        def longest_consecutive(arr):
+            # Sort the list to bring numbers in order
+            arr.sort()
+
+            # longest stores the maximum consecutive length found
+            longest = 1
+
+            # curr stores the current consecutive count
+            curr = 1
+
+            # Loop through the list starting from index 1
+            for i in range(1, len(arr)):
+                # Check if current element is consecutive to previous
+                if arr[i] == arr[i - 1] + 1:
+                    curr += 1                 # increase current count
+                    longest = max(longest, curr)  # update longest
+                else:
+                    curr = 1                  # reset if not consecutive
+
+            # Return longest consecutive sequence length
+            return longest
+
+        # Find maximum horizontal gap (+1 because gaps are one more than bars)
+        max_h = longest_consecutive(hBars) + 1
+
+        # Find maximum vertical gap (+1 because gaps are one more than bars)
+        max_v = longest_consecutive(vBars) + 1
+
+        # The largest square side is the minimum of horizontal and vertical gaps
+        side = min(max_h, max_v)
+
+        # Return the area of the square
+        return side * side
