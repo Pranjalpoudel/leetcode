@@ -1,0 +1,16 @@
+class Solution:
+    def minBitwiseArray(self, nums: List[int]) -> List[int]:
+        ans = []
+        for x in nums:
+            # Try all values from 0 to x-1
+            found = -1
+            for j in range(x):
+                if (j | (j + 1)) == x:
+                    found = j
+                    break
+            ans.append(found)
+        return ans
+
+
+
+        
