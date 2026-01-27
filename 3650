@@ -1,0 +1,47 @@
+import heapq
+from typing import List
+
+class Solution:
+    def minCost(self, n: int, edges: List[List[int]]) -> int:
+        # 1. Graph Construction
+        # adj[u] stores (v, weight, is_reverse)
+        adj = [[] for _ in range(n)]
+        for u, v, w in edges:
+            adj[u].append((v, w, False)) # Original edge
+            adj[v].append((u, w, True))  # Potential reversal edge
+            
+        # 2. Dijkstra
+        # dist[u] = min cost to reach node u
+        dist = [float('inf')] * n
+        dist[0] = 0
+        pq = [(0, 0)] # (cost, u)
+        
+        while pq:
+            d, u = heapq.heappop(pq)
+            
+            if d > dist[u]:
+                continue
+            if u == n - 1:
+                return d
+            
+            # Group neighbors to handle the "one switch per node" rule
+            # You can take ANY number of original edges from u, 
+            # OR exactly ONE reversed edge from u.
+            
+            # First, check all original edges (cost w)
+            for v, w, is_reverse in adj[u]:
+                if not is_reverse:
+                    if dist[u] + w < dist[v]:
+                        dist[v] = dist[u] + w
+                        heapq.heappush(pq, (dist[v], v))
+                
+            # Second, check all possible reversed edges (cost 2*w)
+            # IMPORTANT: The rule says "use its switch... on ONE of its incoming edges"
+            for v, w, is_reverse in adj[u]:
+                if is_reverse:
+                    reversal_cost = 2 * w
+                    if dist[u] + reversal_cost < dist[v]:
+                        dist[v] = dist[u] + reversal_cost
+                        heapq.heappush(pq, (dist[v], v))
+                        
+        return dist[n-1] if dist[n-1] != float('inf') else -1
