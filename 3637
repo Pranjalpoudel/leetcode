@@ -1,0 +1,32 @@
+class Solution:
+    def isTrionic(self, nums: List[int]) -> bool:
+        n = len(nums) - 1
+
+        for i in range(n):
+            if nums[i] == nums[i+1]:
+                return False
+
+        i = 0
+
+        # ↑ increasing
+        start = i
+        while i < n and nums[i] < nums[i+1]:
+            i += 1
+        if i == start:
+            return False
+
+        # ↓ decreasing
+        start = i
+        while i < n and nums[i] > nums[i+1]:
+            i += 1
+        if i == start:
+            return False
+
+        # ↑ increasing again
+        start = i
+        while i < n and nums[i] < nums[i+1]:
+            i += 1
+        if i == start:
+            return False
+
+        return i == n
