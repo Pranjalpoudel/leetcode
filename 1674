@@ -1,0 +1,34 @@
+class Solution:
+    def minMoves(self, nums: list[int], limit: int) -> int:
+        # Difference array to track move changes for each possible sum S
+        # Possible sums range from 2 to 2*limit, so we need size 2*limit + 2
+        diff = [0] * (2 * limit + 2)
+        n = len(nums)
+        
+        for i in range(n // 2):
+            a, b = nums[i], nums[n - 1 - i]
+            
+            # Default: 2 moves for all sums in the range [2, 2*limit]
+            diff[2] += 2
+            diff[2 * limit + 1] -= 2
+            
+            # Reduce to 1 move if S is in [min(a, b) + 1, max(a, b) + limit]
+            low = min(a, b) + 1
+            high = max(a, b) + limit
+            diff[low] -= 1
+            diff[high + 1] += 1
+            
+            # Reduce to 0 moves if S is exactly a + b
+            target = a + b
+            diff[target] -= 1
+            diff[target + 1] += 1
+            
+        # Sweep through the difference array to find the minimum moves
+        min_moves = n # Maximum possible moves is n (changing every element)
+        current_moves = 0
+        for s in range(2, 2 * limit + 1):
+            current_moves += diff[s]
+            if current_moves < min_moves:
+                min_moves = current_moves
+                
+        return min_moves
